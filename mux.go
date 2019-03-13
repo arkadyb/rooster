@@ -7,18 +7,18 @@ import (
 )
 
 // QueueSelector decribes strategy used to select Queue
-type QueueSelector func([]*Queue) *Queue
+type QueueSelectorFunc func([]*Queue) *Queue
 
-// Mux type stores data of available queues and manages queue selection to schedule job
-type Mux struct {
+// Rooster type stores data of available queues and manages queue selection to schedule job
+type Rooster struct {
 	queues   []*Queue
 	jobsmap  map[uuid.UUID]*Queue
 	selector func([]*Queue) *Queue
 }
 
-// NewMux returns new Mux item
-func NewMux(selector QueueSelector, queues []*Queue) *Mux {
-	return &Mux{
+// NewMux returns new Rooster item
+func NewRooster(selector QueueSelectorFunc, queues []*Queue) *Rooster {
+	return &Rooster{
 		jobsmap:  make(map[uuid.UUID]*Queue),
 		selector: selector,
 		queues:   queues,
@@ -26,7 +26,7 @@ func NewMux(selector QueueSelector, queues []*Queue) *Mux {
 }
 
 // Dequeue removes job from being scheduled
-func (m *Mux) Dequeue(job Job) error {
+func (m *Rooster) Dequeue(job Job) error {
 	if _, ok := m.jobsmap[job.GetID()]; ok {
 		queue := m.jobsmap[job.GetID()]
 		return queue.Dequeue(job)
@@ -36,7 +36,7 @@ func (m *Mux) Dequeue(job Job) error {
 }
 
 // Enqueue schedules passed job
-func (m *Mux) Enqueue(job *Job) {
+func (m *Rooster) Enqueue(job *Job) {
 	q := m.selector(m.queues)
 	q.Enqueue(job)
 	m.jobsmap[job.GetID()] = q

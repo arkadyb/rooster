@@ -9,7 +9,7 @@ import (
 // JobFunc used to describe functionality to to run by the scheduler
 type JobFunc func(*Job)
 
-// Job describes work item used in Queues and Mux
+// Job describes work item used in Queues and Rooster
 type Job struct {
 	id uuid.UUID
 
@@ -20,7 +20,7 @@ type Job struct {
 // NewJob returns new Job item
 func NewJob(when time.Time, f JobFunc) *Job {
 	return &Job{
-		id: uuid.NewV4(),
+		id: uuid.Must(uuid.NewV4()),
 
 		when: when,
 		f:    f,
